@@ -7,7 +7,7 @@ import { request } from '@umijs/max';
 export async function optimizePromptApi(
   body?: API.PromptText,
 ) {
-  return request<API.PromptText>('/api/v1/optimizePrompt', {
+  return request<API.PromptText>('http://localhost:8002/optimize-prompt/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -16,9 +16,9 @@ export async function optimizePromptApi(
   });
 }
 export async function getPromptImageApi(
-  body?: API.PromptText,
+  body?: API.PromptImageText,
 ) {
-  return request<API.PromptText>('/api/v1/getPromptImage', {
+  return request('http://localhost:8002/generate-image/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

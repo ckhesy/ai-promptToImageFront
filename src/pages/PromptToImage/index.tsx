@@ -18,21 +18,20 @@ const OpitmizePrompt: React.FC = () => {
     }
     const  optimizePromptFunc = () => {
       console.log(text);
-      optimizePromptApi({ text }).then(res => {
+      optimizePromptApi({ "prompt": text }).then(res => {
         console.log(res)
-        const {data}  =res;
-        if(data){
-          setOptimizePrompt(data)
+        const {optimized_prompt}  =res;
+        if(optimized_prompt){
+          setOptimizePrompt(optimized_prompt)
         }
       })
       
     }
     const getImageFunc = () => {
       getPromptImageApi({ text}).then(res => {
-        const {data} = res;
-        console.log(data)
-        if(data){
-          setImage(data)
+        const {image_url} = res;
+        if(image_url){
+          setImage(image_url)
         }
       })
     }

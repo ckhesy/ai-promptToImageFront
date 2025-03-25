@@ -65,6 +65,10 @@ declare namespace API {
   }
 
   interface PromptText {
+    prompt?: string;
+  }
+  
+  interface PromptImageText {
     text?: string;
   }
 
