@@ -14,7 +14,7 @@ const OpitmizePrompt: React.FC = () => {
     const [optimizePrompt, setOptimizePrompt] = useState<string>('');
     const [image, setImage] = useState<string>('');
     const changeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setText(trim(e.target.value));
+      setText(e.target.value);
     }
     const  optimizePromptFunc = () => {
       console.log(text);
