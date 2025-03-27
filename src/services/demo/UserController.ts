@@ -26,6 +26,17 @@ export async function getPromptImageApi(
     data: body,
   });
 }
+export async function getOptimizePromptImageApi(
+  body?: API.PromptImageText,
+) {
+  return request('http://localhost:8002/generateoptimize-image/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+  });
+}
 
 /** 此处后端没有提供注释 GET /api/v1/queryUserList */
 export async function queryUserList(

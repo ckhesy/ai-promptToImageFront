@@ -7,7 +7,7 @@ import { Button, Divider, Drawer, message, Input, Typography, Image } from 'antd
 import { ForwardOutlined } from '@ant-design/icons';
 import styles from './index.less';
 import services from '@/services/demo';
-const { addUser, queryUserList, getPromptImageApi, optimizePromptApi } =
+const { addUser, queryUserList, getPromptImageApi, optimizePromptApi, getOptimizePromptImageApi } =
   services.UserController;
 
 const OpitmizePrompt: React.FC = () => {
@@ -32,29 +32,33 @@ const OpitmizePrompt: React.FC = () => {
       })
       
     }
-    const getImageFunc = (text, cb) => {
+    const getImageFunc = () => {
       getPromptImageApi({ text}).then(res => {
         const {image_url, image_base64} = res;
         if(image_url||image_base64){
-          cb && cb(image_url||image_base64)
-          // setImage(image_url||image_base64)
+          setImage(image_url||image_base64)
         }else{
           message.error('No image file found')
         }
       })
     }
     const getImageFuncForOptimizePrompt = () => {
+      getOptimizePromptImageApi({ text}).then(res => {
+        const {image_url, image_base64} = res;
+        if(image_url||image_base64){
+          setOptimizedImage(image_url||image_base64)
+        }else{
+          message.error('No image file found')
+        }
+      })
+    }
 
-    }
-    const useOptimizePrompt = () => {
-      setText(optimizePrompt)
-    }
     return (
       <div>
         <div style={{display: 'flex'}}>
           <div>
           <Input.TextArea value={text} onChange={changeText} rows={4} />
-          <Button className={styles.buttonstyle} onClick={() => getImageFunc(text, (img: string) => setImage(img))} type="primary">Get Image</Button>
+          <Button className={styles.buttonstyle} onClick={getImageFunc} type="primary">Get Image</Button>
           {
           image && <div>
             <Image
@@ -70,7 +74,7 @@ const OpitmizePrompt: React.FC = () => {
         <Button className={styles.buttonstyle} onClick={optimizePromptFunc} type="primary">Optimize Prompt<ForwardOutlined /></Button>
         <div>
         <Input.TextArea value={optimizePrompt} onChange={changeOptimizeText} rows={4} />
-        <Button className={styles.buttonstyle} onClick={() => getImageFunc(optimizePrompt, (img: string) => setOptimizedImage(img))} type="primary">Get Image By optimized Promot</Button>
+        <Button className={styles.buttonstyle} onClick={getImageFuncForOptimizePrompt} type="primary">Get Image By optimized Promot</Button>
         {
         optimizedImage && <Image
         width={200}
