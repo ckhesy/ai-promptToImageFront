@@ -34,6 +34,16 @@ export default defineConfig({
       path: '/promptToImage', 
       component: './PromptToImage',
     },
+    {
+      name: '用户表单',
+      path: '/userList', 
+      component: './userList',
+    },
+    {
+      name: 'chat',
+      path: '/chat', 
+      component: './chat',
+    },
   ],
   npmClient: 'npm',
 });
