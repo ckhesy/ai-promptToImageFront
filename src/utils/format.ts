@@ -13,5 +13,5 @@ export const convertLocalPathToUrl = (localPath: string): string => {
   
   // 提取文件名
   const fileName = localPath.split('/').pop();
-  return `http://localhost:8000/media/${fileName}`;
+  return `http://localhost:8000/${fileName}`;
 };
