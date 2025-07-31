@@ -260,12 +260,14 @@ const GetMediaByMessageIdForm = () => {
           {media.image_url && (
             <div>
               <div>图片ID: {media.id}</div>
+              <div>图片：</div>
               <img src={convertLocalPathToUrl(media.image_url)} alt="media" style={{ maxWidth: 300 }} />
             </div>
           )}
           {media.video_url && (
             <div>
               <div>视频ID: {media.id}</div>
+              <div>视频：</div>
               <video src={convertLocalPathToUrl(media.video_url)} controls style={{ maxWidth: 300 }} />
             </div>
           )}
