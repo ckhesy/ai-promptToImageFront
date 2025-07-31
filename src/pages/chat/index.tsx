@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Form, Input, Button, message, Select, Row, Col, List, Pagination, Divider, InputNumber } from 'antd';
 import axios from 'axios';
+import { convertLocalPathToUrl } from '../../utils/format';
 
 const { Option } = Select;
 
@@ -259,13 +260,13 @@ const GetMediaByMessageIdForm = () => {
           {media.image_url && (
             <div>
               <div>图片ID: {media.id}</div>
-              <img src={`http://localhost:8000/${media.image_url}`} alt="media" style={{ maxWidth: 300 }} />
+              <img src={convertLocalPathToUrl(media.image_url)} alt="media" style={{ maxWidth: 300 }} />
             </div>
           )}
           {media.video_url && (
             <div>
               <div>视频ID: {media.id}</div>
-              <video src={`http://localhost:8000/${media.video_url}`} controls style={{ maxWidth: 300 }} />
+              <video src={convertLocalPathToUrl(media.video_url)} controls style={{ maxWidth: 300 }} />
             </div>
           )}
         </div>
