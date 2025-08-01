@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Form, Input, Button, message, Select, Row, Col, List, Pagination, Divider, InputNumber } from 'antd';
 import axios from 'axios';
 import { convertLocalPathToUrl } from '../../utils/format';
-
+import ImageToVideoPage from './imagetoVideo';
 const { Option } = Select;
 
 // 1. 用户注册
@@ -286,6 +286,7 @@ const ChatPage = () => {
       <GetMessageByIdForm />
       <GetMessagesByUserForm />
       <GetMediaByMessageIdForm />
+      <ImageToVideoPage />
     </div>
   );
 };
