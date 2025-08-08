@@ -3,7 +3,9 @@ import { Card, Form, Input, Button, message, Select, Row, Col, List, Pagination,
 import axios from 'axios';
 import { convertLocalPathToUrl } from '../../utils/format';
 import ImageToVideoPage from './imagetoVideo';
+import './chat-page-ultra-cool.css';
 const { Option } = Select;
+
 
 // 1. 用户注册
 const RegisterUserForm = () => {

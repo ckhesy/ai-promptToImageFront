@@ -12,32 +12,37 @@ export default defineConfig({
   routes: [
     {
       path: '/',
-      redirect: '/home',
+      redirect: '/chat',
     },
     {
       name: '首页',
       path: '/home',
       component: './Home',
+      hideInMenu: true,
     },
     {
       name: '权限演示',
       path: '/access',
       component: './Access',
+      hideInMenu: true,
     },
     {
       name: ' CRUD 示例',
       path: '/table',
       component: './Table',
+      hideInMenu: true,
     },
     {
       name: 'prompt TO Image',
       path: '/promptToImage', 
       component: './PromptToImage',
+      hideInMenu: true,
     },
     {
       name: '用户表单',
       path: '/userList', 
       component: './userList',
+      hideInMenu: true,
     },
     {
       name: 'chat',
