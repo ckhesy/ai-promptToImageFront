@@ -9,11 +9,15 @@ const CreateUserForm = () => {
     const onFinish = async (values: { username: string; email: string; password: string }) => {
         setLoading(true);
         try {
-            const results = await axios.post('http://127.0.0.1:8000/api/v1/users/reg', values);
-
-            message.success(`User created successfully! ID: ${results.data.id}`);
-        } catch (error) {
-            message.error('Failed to create user.');
+            const results = await axios.post('http://127.0.0.1:8000/api/v1/users/reg', { ...values, mock: true });
+            const { code, message: msgText, data } = results.data || {};
+            if (code === 0) {
+                message.success(`User created successfully! ID: ${data.id}`);
+            } else {
+                throw new Error(msgText || 'Failed to create user.');
+            }
+        } catch (error: any) {
+            message.error(error?.message || 'Failed to create user.');
         } finally {
             setLoading(false);
         }
@@ -64,11 +68,16 @@ const SearchUserForm = () => {
     const onFinish = async (values: { id: string }) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/${values.id}`);
-            setUserData(response.data);
-            message.success('User fetched successfully!');
-        } catch (error) {
-            message.error('Failed to fetch user.');
+            const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/${values.id}`, { params: { mock: true } });
+            const { code, message: msgText, data } = response.data || {};
+            if (code === 0) {
+                setUserData(data);
+                message.success('User fetched successfully!');
+            } else {
+                throw new Error(msgText || 'Failed to fetch user.');
+            }
+        } catch (error: any) {
+            message.error(error?.message || 'Failed to fetch user.');
             setUserData(null);
         } finally {
             setLoading(false);
