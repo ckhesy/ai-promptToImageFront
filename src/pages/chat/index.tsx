@@ -66,7 +66,7 @@ const GenerateMessageForm = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values, mock: true, image_url: '' });
+      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values,  image_url: '' });
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setMedia(data);
