@@ -18,6 +18,7 @@ import {
   PlayCircleOutlined
 } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
+import axios from 'axios';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -31,38 +32,95 @@ interface VideoResponse {
   created_at: string;
 }
 
+interface UploadResponse {
+  image_url: string;
+  width: number;
+  height: number;
+  format: string;
+}
+
 const ImageToVideoPage: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string>('');
+  const [imageInfo, setImageInfo] = useState<UploadResponse | null>(null);
   const [videoResult, setVideoResult] = useState<VideoResponse | null>(null);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  // 处理图片上传
-  const handleUpload: UploadProps['onChange'] = (info) => {
+  // Handle image upload
+  const handleUpload: UploadProps['onChange'] = async (info) => {
     setFileList(info.fileList);
     
+    if (info.file.status === 'uploading') {
+      setUploading(true);
+      return;
+    }
+    
     if (info.file.status === 'done') {
-      // 模拟上传成功，获取图片URL
-      const imageUrl = URL.createObjectURL(info.file.originFileObj as Blob);
-      setUploadedImage(imageUrl);
-      message.success(`${info.file.name} 上传成功`);
+      setUploading(false);
+      const response = info.file.response;
+      if (response && response.code === 0) {
+        const { image_url, width, height, format } = response.data;
+        setImageInfo({ image_url, width, height, format });
+        setUploadedImage(`http://localhost:8000${image_url}`);
+        message.success(`${info.file.name} uploaded successfully`);
+      } else {
+        message.error(response?.message || 'Upload failed');
+      }
     } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} 上传失败`);
+      setUploading(false);
+      message.error(`${info.file.name} upload failed`);
     }
   };
 
-  // 提交表单
+  // Custom upload function
+  const customUpload = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const response = await axios.post('http://localhost:8000/media/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.data.code === 0) {
+        onSuccess(response.data);
+      } else {
+        onError(new Error(response.data.message || 'Upload failed'));
+      }
+    } catch (error: any) {
+      onError(error);
+    }
+  };
+
+  // Submit form
   const onFinish = async (values: any) => {
     if (!uploadedImage) {
-      message.error('请先上传图片');
+      message.error('Please upload an image first');
       // return;
     }
-
+    //获取刚刚上传的图片url
+    // const image_url = uploadedImage
+    console.log(uploadedImage);
     setLoading(true);
+    // 在这里调用生成视频的api
+    const res = await axios.post('http://localhost:8000/api/v1/messages/generate', {
+      image_url: uploadedImage,
+      prompt: values.prompt,
+      media_type: "image2video",
+      user_id: "1",
+      // mock: true
+    });
+    console.log(res);
+    const response = res.data?.data || null;
     try {
-      // Mock API 调用
-      const mockResponse: VideoResponse = {
+      // Mock API call
+      const mockResponse: VideoResponse = response || {
         id: `video_${Date.now()}`,
         video_url: 'https://encrypted-vtbn0.gstatic.com/video?q=tbn:ANd9GcT5qERflVRX9_9-Vh41PdJgXu2vs60n2gToOw',
         // cover_url: uploadedImage,
@@ -72,25 +130,26 @@ const ImageToVideoPage: React.FC = () => {
         created_at: new Date().toISOString()
       };
 
-      // 模拟网络延迟
+      // Simulate network delay
       await new Promise<void>((resolve) => {
         setTimeout(() => resolve(), 2000);
       });
       
       setVideoResult(mockResponse);
-      message.success('视频生成成功！');
+      message.success('Video generated successfully!');
     } catch (error) {
-      message.error('视频生成失败，请重试');
+      message.error('Video generation failed, please try again');
       console.error('Error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 重置表单
+  // Reset form
   const handleReset = () => {
     form.resetFields();
     setUploadedImage('');
+    setImageInfo(null);
     setVideoResult(null);
     setFileList([]);
   };
@@ -98,117 +157,130 @@ const ImageToVideoPage: React.FC = () => {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
       <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
-        图片转视频生成器
+        Image to Video Generator
       </Title>
 
       <Row gutter={24}>
-        {/* 左侧：输入区域 */}
+        {/* Left: Input area */}
         <Col xs={24} lg={12}>
-          <Card title="输入信息" style={{ marginBottom: 24 }}>
+          <Card title="Input Information" style={{ marginBottom: 24 }}>
             <Form
               form={form}
               layout="vertical"
               onFinish={onFinish}
               disabled={loading}
             >
-              {/* 图片上传 */}
+              {/* Image upload */}
               <Form.Item
-                label="上传图片"
+                label="Upload Image"
                 name="image"
-                rules={[{ required: true, message: '请上传图片' }]}
+                rules={[{ required: true, message: 'Please upload an image' }]}
               >
                 <Upload
                   listType="picture-card"
                   fileList={fileList}
                   onChange={handleUpload}
-                  beforeUpload={() => false} // 阻止自动上传
+                  customRequest={customUpload}
                   accept="image/*"
                   maxCount={1}
+                  showUploadList={{
+                    showPreviewIcon: true,
+                    showRemoveIcon: true,
+                  }}
                 >
                   {fileList.length < 1 && (
                     <div>
                       <UploadOutlined />
-                      <div style={{ marginTop: 8 }}>上传图片</div>
+                      <div style={{ marginTop: 8 }}>Upload Image</div>
                     </div>
                   )}
                 </Upload>
               </Form.Item>
 
-              {/* Prompt输入 */}
+              {/* Prompt input */}
               <Form.Item
-                label="描述提示词"
+                label="Description Prompt"
                 name="prompt"
                 rules={[
-                  { required: true, message: '请输入描述提示词' },
-                  { min: 10, message: '提示词至少10个字符' }
+                  { required: true, message: 'Please enter a description prompt' },
+                  { min: 10, message: 'Prompt must be at least 10 characters' }
                 ]}
               >
                 <TextArea
                   rows={4}
-                  placeholder="请详细描述您希望生成的视频内容，例如：将这张风景照片转换为一个动态的视频，包含云朵飘动、树叶摇曳等自然元素..."
+                  placeholder="Please describe in detail the video content you want to generate, for example: Convert this landscape photo into a dynamic video with floating clouds, swaying leaves and other natural elements..."
                   showCount
                   maxLength={500}
                 />
               </Form.Item>
 
-              {/* 操作按钮 */}
+              {/* Action buttons */}
               <Form.Item>
                 <Button
                   type="primary"
                   htmlType="submit"
-                  loading={loading}
+                  loading={loading || uploading}
                   icon={<PlayCircleOutlined />}
                   size="large"
                   style={{ marginRight: 16 }}
+                  disabled={!uploadedImage}
                 >
-                  生成视频
+                  Generate Video
                 </Button>
                 <Button
                   onClick={handleReset}
                   size="large"
                 >
-                  重置
+                  Reset
                 </Button>
               </Form.Item>
             </Form>
           </Card>
         </Col>
 
-        {/* 右侧：预览和结果区域 */}
+        {/* Right: Preview and result area */}
         <Col xs={24} lg={12}>
-          {/* 上传的图片预览 */}
-          {uploadedImage && (
-            <Card title="上传的图片" style={{ marginBottom: 24 }}>
+          {/* Uploaded image preview */}
+          {uploadedImage && imageInfo && (
+            <Card title="Uploaded Image" style={{ marginBottom: 24 }}>
               <Image
                 src={uploadedImage}
-                alt="上传的图片"
+                alt="Uploaded image"
                 style={{ width: '100%', maxHeight: 300, objectFit: 'contain' }}
               />
+              <div style={{ marginTop: 16 }}>
+                <Text strong>Image Information:</Text>
+                <div style={{ marginTop: 8 }}>
+                  <div><Text>Dimensions: {imageInfo.width} x {imageInfo.height}</Text></div>
+                  <div><Text>Format: {imageInfo.format}</Text></div>
+                  <div><Text>URL: {imageInfo.image_url}</Text></div>
+                </div>
+              </div>
             </Card>
           )}
 
-          {/* 生成结果 */}
+          {/* Generation result */}
           {loading && (
-            <Card title="生成中..." style={{ marginBottom: 24 }}>
+            <Card title="Generating..." style={{ marginBottom: 24 }}>
               <div style={{ textAlign: 'center', padding: 40 }}>
                 <Spin size="large" />
                 <div style={{ marginTop: 16 }}>
-                  <Text>正在生成视频，请稍候...</Text>
+                  <Text>Generating video, please wait...</Text>
                 </div>
               </div>
             </Card>
           )}
 
           {videoResult && (
-            <Card title="生成结果" style={{ marginBottom: 24 }}>
+            <Card title="Generation Result" style={{ marginBottom: 24 }}>
               <div>
-                {/* 视频封面 */}
+                {/* Video cover */}
                 <div style={{ marginBottom: 16 }}>
-                  <Text strong>视频封面：</Text>
+                  <Text strong>Video Cover:</Text>
                   <div style={{ marginTop: 8 }}>
                     <Image
                       src={videoResult.cover_url}
-                      alt="视频封面"
+                      alt="Video cover"
                       style={{ width: '100%', maxHeight: 200, objectFit: 'contain' }}
                     />
                   </div>
@@ -216,9 +288,9 @@ const ImageToVideoPage: React.FC = () => {
 
                 <Divider />
 
-                {/* 生成的视频 */}
+                {/* Generated video */}
                 <div style={{ marginBottom: 16 }}>
-                  <Text strong>生成的视频：</Text>
+                  <Text strong>Generated Video:</Text>
                   <div style={{ marginTop: 8 }}>
                     <video
                       controls
@@ -226,32 +298,32 @@ const ImageToVideoPage: React.FC = () => {
                       poster={videoResult.cover_url}
                     >
                       <source src={videoResult.video_url} type="video/mp4" />
-                      您的浏览器不支持视频播放。
+                      Your browser does not support video playback.
                     </video>
                   </div>
                 </div>
 
                 <Divider />
 
-                {/* 详细信息 */}
+                {/* Detailed information */}
                 <div>
-                  <Text strong>生成信息：</Text>
+                  <Text strong>Generation Info:</Text>
                   <div style={{ marginTop: 8 }}>
                     <div><Text>ID: {videoResult.id}</Text></div>
-                    <div><Text>提示词: {videoResult.prompt}</Text></div>
-                    <div><Text>状态: {videoResult.status}</Text></div>
-                    <div><Text>创建时间: {new Date(videoResult.created_at).toLocaleString()}</Text></div>
+                    <div><Text>Prompt: {videoResult.prompt}</Text></div>
+                    <div><Text>Status: {videoResult.status}</Text></div>
+                    <div><Text>Created at: {new Date(videoResult.created_at).toLocaleString()}</Text></div>
                   </div>
                 </div>
 
-                {/* 下载按钮 */}
+                {/* Download button */}
                 <div style={{ marginTop: 16 }}>
                   <Button
                     type="primary"
                     icon={<PlayCircleOutlined />}
                     onClick={() => window.open(videoResult.video_url, '_blank')}
                   >
-                    下载视频
+                    Download Video
                   </Button>
                 </div>
               </div>
