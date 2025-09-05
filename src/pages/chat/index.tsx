@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, message, Select, List, Pagination, InputNumber } from 'antd';
+import { Card, Form, Input, Button, message, Select, List, Pagination } from 'antd';
 import axios from 'axios';
 import { convertLocalPathToUrl } from '../../utils/format';
 import ImageToVideoPage from './imagetoVideo';
@@ -7,7 +7,7 @@ import './chat-page-ultra-cool.css';
 const { Option } = Select;
 
 
-// 1. 用户注册
+// 1. User Registration
 const RegisterUserForm = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -19,12 +19,12 @@ const RegisterUserForm = () => {
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setUser(data);
-        message.success('注册成功');
+        message.success('Registration successful');
       } else {
-        throw new Error(msgText || '注册失败');
+        throw new Error(msgText || 'Registration failed');
       }
     } catch (e: any) {
-      message.error(e?.message || '注册失败');
+      message.error(e?.message || 'Registration failed');
       setUser(null);
     } finally {
       setLoading(false);
@@ -32,33 +32,33 @@ const RegisterUserForm = () => {
   };
 
   return (
-    <Card title="注册新用户" style={{ marginBottom: 24 }}>
+    <Card title="Register New User" style={{ marginBottom: 24 }}>
       <Form layout="vertical" onFinish={onFinish}>
-        <Form.Item label="用户名" name="username" rules={[{ required: true }]}>
+        <Form.Item label="Username" name="username" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="邮箱" name="email" rules={[{ required: true, type: 'email' }]}>
+        <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email' }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="密码" name="password" rules={[{ required: true }]}>
+        <Form.Item label="Password" name="password" rules={[{ required: true }]}>
           <Input.Password />
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>注册</Button>
+        <Button type="primary" htmlType="submit" loading={loading}>Register</Button>
       </Form>
       {user && (
         <div style={{ marginTop: 16 }}>
-          <b>注册成功：</b>
+          <b>Registration successful:</b>
           <div>ID: {user.id}</div>
-          <div>用户名: {user.username}</div>
-          <div>邮箱: {user.email}</div>
-          <div>注册时间: {user.created_at}</div>
+          <div>Username: {user.username}</div>
+          <div>Email: {user.email}</div>
+          <div>Registration time: {user.created_at}</div>
         </div>
       )}
     </Card>
   );
 };
 
-// 2. 生成消息和媒体
+// 2. Generate Message and Media
 const GenerateMessageForm = () => {
   const [loading, setLoading] = useState(false);
   const [media, setMedia] = useState<any>(null);
@@ -66,16 +66,16 @@ const GenerateMessageForm = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values,  image_url: '' });
+      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values,image_url: '' });
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setMedia(data);
-        message.success('消息生成成功');
+        message.success('Message generated successfully');
       } else {
-        throw new Error(msgText || '生成失败');
+        throw new Error(msgText || 'Generation failed');
       }
     } catch (e: any) {
-      message.error(e?.message || '生成失败');
+      message.error(e?.message || 'Generation failed');
       setMedia(null);
     } finally {
       setLoading(false);
@@ -83,42 +83,44 @@ const GenerateMessageForm = () => {
   };
 
   return (
-    <Card title="生成消息和媒体" style={{ marginBottom: 24 }}>
+    <Card title="Generate Message and Media" style={{ marginBottom: 24 }}>
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item label="Prompt" name="prompt" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="用户ID" name="user_id" rules={[{ required: true }]}>
+        <Form.Item label="User ID" name="user_id" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="媒体类型" name="media_type">
-          <Select allowClear placeholder="请选择">
-            <Option value="image">图片</Option>
-            <Option value="video">视频</Option>
-            <Option value="text">文本</Option>
-            <Option value="image2video">图生视频</Option>
+        <Form.Item label="Media Type" name="media_type">
+          <Select allowClear placeholder="Please select">
+            <Option value="image">Image</Option>
+            <Option value="video">Video</Option>
+            <Option value="text">Text</Option>
+            <Option value="image2video">Image to Video</Option>
           </Select>
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>生成</Button>
+        <Button type="primary" htmlType="submit" loading={loading}>Generate</Button>
       </Form>
       {media && (
         <div style={{ marginTop: 16 }}>
-          <b>生成结果：</b>
+          <b>Generation Result:</b>
           {(
+            media.image_url &&
             <div style={{ marginTop: 8 }}>
-              <div>图片ID: {media.id}</div>
-              <div>图片地址: {media.image_url}</div>
-              <div>尺寸: {media.width} x {media.height}</div>
-              <div>格式: {media.format}</div>
-              <div>创建时间: {media.created_at}</div>
+              <div>Image ID: {media.id}</div>
+              <div>Image URL: {media.image_url}</div>
+              <div>Dimensions: {media.width} x {media.height}</div>
+              <div>Format: {media.format}</div>
+              <div>Created at: {media.created_at}</div>
               <img src={convertLocalPathToUrl(media.image_url)} alt="media" style={{ maxWidth: 300, display: 'block', marginTop: 8 }} />
             </div>
           )}
           {(
+            media.video_url &&
             <div style={{ marginTop: 8 }}>
-              <div>视频ID: {media.id}</div>
-              <div>视频地址: {media.video_url}</div>
-              <div>创建时间: {media.created_at}</div>
+              <div>Video ID: {media.id}</div>
+              <div>Video URL: {media.video_url}</div>
+              <div>Created at: {media.created_at}</div>
               <video src={convertLocalPathToUrl(media.video_url)} controls style={{ maxWidth: 300, display: 'block', marginTop: 8 }} />
             </div>
           )}
@@ -128,7 +130,7 @@ const GenerateMessageForm = () => {
   );
 };
 
-// 3. 按ID查询消息
+// 3. Get Message by ID
 const GetMessageByIdForm = () => {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<any>(null);
@@ -140,12 +142,12 @@ const GetMessageByIdForm = () => {
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setMsg(data);
-        message.success('查询成功');
+        message.success('Query successful');
       } else {
-        throw new Error(msgText || '查询失败');
+        throw new Error(msgText || 'Query failed');
       }
     } catch (e: any) {
-      message.error(e?.message || '查询失败');
+      message.error(e?.message || 'Query failed');
       setMsg(null);
     } finally {
       setLoading(false);
@@ -153,27 +155,27 @@ const GetMessageByIdForm = () => {
   };
 
   return (
-    <Card title="按ID查询消息" style={{ marginBottom: 24 }}>
+    <Card title="Get Message by ID" style={{ marginBottom: 24 }}>
       <Form layout="inline" onFinish={onFinish}>
-        <Form.Item label="消息ID" name="message_id" rules={[{ required: true }]}>
+        <Form.Item label="Message ID" name="message_id" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>查询</Button>
+        <Button type="primary" htmlType="submit" loading={loading}>Query</Button>
       </Form>
       {msg && (
         <div style={{ marginTop: 16 }}>
           <div>ID: {msg.id}</div>
           <div>Prompt: {msg.prompt}</div>
-          <div>用户ID: {msg.user_id}</div>
-          <div>媒体类型: {msg.media_type}</div>
-          <div>创建时间: {msg.created_at}</div>
+          <div>User ID: {msg.user_id}</div>
+          <div>Media Type: {msg.media_type}</div>
+          <div>Created at: {msg.created_at}</div>
         </div>
       )}
     </Card>
   );
 };
 
-// 4. 按用户ID查询消息（带分页和类型筛选）
+// 4. Get Messages by User ID (with pagination and type filtering)
 const GetMessagesByUserForm = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -199,10 +201,10 @@ const GetMessagesByUserForm = () => {
         const length = Array.isArray(data) ? data.length : 0;
         setTotal(length < p.limit ? p.skip + length : p.skip + p.limit + 1);
       } else {
-        throw new Error(msgText || '查询失败');
+        throw new Error(msgText || 'Query failed');
       }
     } catch (e: any) {
-      message.error(e?.message || '查询失败');
+      message.error(e?.message || 'Query failed');
       setMessages([]);
     } finally {
       setLoading(false);
@@ -222,18 +224,18 @@ const GetMessagesByUserForm = () => {
   };
 
   return (
-    <Card title="按用户ID查询消息" style={{ marginBottom: 24 }}>
+    <Card title="Get Messages by User ID" style={{ marginBottom: 24 }}>
       <Form layout="inline" form={form} onFinish={onFinish}>
-        <Form.Item label="用户ID" name="user_id" rules={[{ required: true }]}>
+        <Form.Item label="User ID" name="user_id" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="媒体类型" name="media_type">
+        <Form.Item label="Media Type" name="media_type">
           <Select allowClear style={{ width: 120 }}>
-            <Option value="image">图片</Option>
-            <Option value="video">视频</Option>
+            <Option value="image">Image</Option>
+            <Option value="video">Video</Option>
           </Select>
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>查询</Button>
+        <Button type="primary" htmlType="submit" loading={loading}>Query</Button>
       </Form>
       <List
         style={{ marginTop: 16 }}
@@ -245,8 +247,8 @@ const GetMessagesByUserForm = () => {
             <div>
               <div>ID: {item.id}</div>
               <div>Prompt: {item.prompt}</div>
-              <div>媒体类型: {item.media_type}</div>
-              <div>创建时间: {item.created_at}</div>
+              <div>Media Type: {item.media_type}</div>
+              <div>Created at: {item.created_at}</div>
             </div>
           </List.Item>
         )}
@@ -264,7 +266,7 @@ const GetMessagesByUserForm = () => {
   );
 };
 
-// 5. 获取消息媒体
+// 5. Get Message Media
 const GetMediaByMessageIdForm = () => {
   const [loading, setLoading] = useState(false);
   const [media, setMedia] = useState<any>(null);
@@ -276,12 +278,12 @@ const GetMediaByMessageIdForm = () => {
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setMedia(data);
-        message.success('获取成功');
+        message.success('Retrieved successfully');
       } else {
-        throw new Error(msgText || '获取失败');
+        throw new Error(msgText || 'Retrieval failed');
       }
     } catch (e: any) {
-      message.error(e?.message || '获取失败');
+      message.error(e?.message || 'Retrieval failed');
       setMedia(null);
     } finally {
       setLoading(false);
@@ -289,26 +291,26 @@ const GetMediaByMessageIdForm = () => {
   };
 
   return (
-    <Card title="获取消息媒体" style={{ marginBottom: 24 }}>
+    <Card title="Get Message Media" style={{ marginBottom: 24 }}>
       <Form layout="inline" onFinish={onFinish}>
-        <Form.Item label="消息ID" name="message_id" rules={[{ required: true }]}>
+        <Form.Item label="Message ID" name="message_id" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>获取</Button>
+        <Button type="primary" htmlType="submit" loading={loading}>Get</Button>
       </Form>
       {media && (
         <div style={{ marginTop: 16 }}>
           {media.image_url && (
             <div>
-              <div>图片ID: {media.id}</div>
-              <div>图片地址: {media.image_url}</div>
+              <div>Image ID: {media.id}</div>
+              <div>Image URL: {media.image_url}</div>
               <img src={convertLocalPathToUrl(media.image_url)} alt="media" style={{ maxWidth: 300 }} />
             </div>
           )}
           {media.video_url && (
             <div>
-              <div>视频ID: {media.id}</div>
-              <div>视频：</div>
+              <div>Video ID: {media.id}</div>
+              <div>Video:</div>
               <video src={convertLocalPathToUrl(media.video_url)} controls style={{ maxWidth: 300 }} />
             </div>
           )}
@@ -321,7 +323,7 @@ const GetMediaByMessageIdForm = () => {
 const ChatPage = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <h1>AI 消息与媒体演示</h1>
+      <h1>AI Message and Media Demo</h1>
       <RegisterUserForm />
       <GenerateMessageForm />
       <GetMessageByIdForm />
