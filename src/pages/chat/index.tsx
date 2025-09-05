@@ -66,7 +66,7 @@ const GenerateMessageForm = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values, mock: true });
+      const res = await axios.post('http://localhost:8000/api/v1/messages/generate', { ...values, mock: true, image_url: '' });
       const { code, message: msgText, data } = res.data || {};
       if (code === 0) {
         setMedia(data);
@@ -89,7 +89,7 @@ const GenerateMessageForm = () => {
           <Input />
         </Form.Item>
         <Form.Item label="用户ID" name="user_id" rules={[{ required: true }]}>
-          <InputNumber />
+          <Input />
         </Form.Item>
         <Form.Item label="媒体类型" name="type">
           <Select allowClear placeholder="请选择">
@@ -190,7 +190,7 @@ const GetMessagesByUserForm = () => {
           media_type: p.media_type,
           skip: p.skip,
           limit: p.limit,
-          mock: true,
+          //mock: true,
         }
       });
       const { code, message: msgText, data } = res.data || {};
